@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pathfinder Sumatera — Perbandingan Algoritma AI</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <div class="header-eyebrow">Tugas Besar · Kecerdasan Buatan</div>
+      <h1>Pathfinder Sumatera</h1>
+      <p>Perbandingan algoritma DFS, A*, dan Hill Climbing untuk pencarian rute darat antar kota di Sumatera.</p>
+    </header>
+
+    <div class="card">
+
+      <!-- Kontrol -->
+      <div class="controls-row">
+        <label for="sel-start">Kota asal</label>
+        <select id="sel-start"></select>
+        <label for="sel-goal">Kota tujuan</label>
+        <select id="sel-goal"></select>
+        <button class="run-btn" id="run-btn">Jalankan Algoritma</button>
+      </div>
+
+      <!-- Tab -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="map">Semua Edge</button>
+        <button class="tab-btn" data-tab="dfs">DFS</button>
+        <button class="tab-btn" data-tab="astar">A*</button>
+        <button class="tab-btn" data-tab="hc">Hill Climbing</button>
+        <button class="tab-btn" data-tab="compare">Perbandingan</button>
+      </div>
+
+      <!-- Peta Canvas -->
+      <div class="canvas-wrap">
+        <canvas id="map-canvas"></canvas>
+      </div>
+
+      <!-- Legend -->
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div>Start / Goal</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#378ADD"></div>DFS</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#EF9F27"></div>A*</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#D85A30"></div>Hill Climbing</div>
+      </div>
+
+    </div>
+
+    <!-- Hasil -->
+    <div class="section-title">Hasil Pencarian</div>
+    <div class="result-grid" id="result-cards"></div>
+
+    <!-- Info Algoritma -->
+    <div class="info-panel" id="info-panel"></div>
+
+  </div>
+
+  <!--
+    URUTAN LOAD SCRIPT (penting!):
+    1. graph.js   — NODES, EDGES, buildAdjacency(), pathDistance()
+    2. utils.js   — haversine(), formatPath()
+    3. dfs.js     — fungsi dfs()
+    4. astar.js   — fungsi astar()
+    5. hillclimbing.js — fungsi hillClimbing()
+    6. app.js     — controller, pakai semua fungsi di atas
+  -->
+  <script src="data/graph.js"></script>
+  <script src="data/utils.js"></script>
+  <script src="algorithms/dfs.js"></script>
+  <script src="algorithms/astar.js"></script>
+  <script src="algorithms/hillclimbing.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
