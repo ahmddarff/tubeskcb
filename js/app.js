@@ -180,6 +180,8 @@ function draw() {
       ? ["dfs", "astar", "hc"]
       : ALGO_META[activeTab] ? [activeTab] : [];
 
+  const reachedNodes = new Set();
+
   for (const key of toHighlight) {
     const r = results[key];
     if (!r || !r.path.length) continue;
@@ -193,6 +195,11 @@ function draw() {
     const currentTotalProgress = animProgress * totalSegments;
     const currentSegmentIndex = Math.floor(currentTotalProgress);
     const segmentProgress = currentTotalProgress - currentSegmentIndex;
+
+    // Masukkan node yang sudah dilalui ke dalam Set
+    for (let i = 0; i <= currentSegmentIndex && i < r.path.length; i++) {
+      reachedNodes.add(r.path[i]);
+    }
 
     // 2a. Gambar garis yang sudah dilewati sepenuhnya
     for (let i = 1; i <= currentSegmentIndex; i++) {
@@ -231,20 +238,29 @@ function draw() {
   const startVal = document.getElementById("sel-start").value;
   const goalVal  = document.getElementById("sel-goal").value;
 
+  // Ambil warna dari ALGO_META berdasarkan tab yang aktif. 
+  // Jika sedang di tab 'compare', gunakan warna abu-abu netral agar tidak bentrok.
+  const dynamicColor = ALGO_META[activeTab] ? ALGO_META[activeTab].color : "#6b6b68";
+
   for (const name in NODES) {
     const x = px(name), y = py(name);
     const isKey = name === startVal || name === goalVal;
+    const isReached = reachedNodes.has(name) && !isKey; 
+
     ctx.beginPath();
-    ctx.arc(x, y, isKey ? 8 : 5, 0, Math.PI * 2);
-    ctx.fillStyle   = isKey ? "#1D9E75" : "#ffffff";
-    ctx.strokeStyle = isKey ? "#0F6E56" : "rgba(100,100,100,0.35)";
-    ctx.lineWidth   = isKey ? 2 : 1;
+    ctx.arc(x, y, isKey ? 8 : (isReached ? 6.5 : 5), 0, Math.PI * 2);
+    
+    // Terapkan dynamicColor pada fillStyle dan strokeStyle
+    ctx.fillStyle   = isKey ? "#1D9E75" : (isReached ? dynamicColor : "#ffffff");
+    ctx.strokeStyle = isKey ? "#0F6E56" : (isReached ? dynamicColor : "rgba(100,100,100,0.35)");
+    ctx.lineWidth   = isKey ? 2 : (isReached ? 2 : 1);
     ctx.fill(); ctx.stroke();
 
-    ctx.font      = `${isKey ? 500 : 400} ${isKey ? 11 : 10}px 'DM Sans', sans-serif`;
-    ctx.fillStyle = isKey ? "#085041" : "rgba(80,80,80,0.85)";
+    // Terapkan dynamicColor juga pada warna teks kotanya
+    ctx.font      = `${isKey || isReached ? 500 : 400} ${isKey ? 11 : 10}px 'DM Sans', sans-serif`;
+    ctx.fillStyle = isKey ? "#085041" : (isReached ? dynamicColor : "rgba(80,80,80,0.85)");
     ctx.textAlign = "center";
-    ctx.fillText(name, x, y - (isKey ? 12 : 9));
+    ctx.fillText(name, x, y - (isKey || isReached ? 12 : 9));
   }
 }
 
