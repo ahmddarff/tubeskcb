@@ -8,6 +8,24 @@ const adj = buildAdjacency();
 let results = {};
 let activeTab = "map";
 
+let animProgress = 1;
+let animReq = null;
+
+function startAnimation() {
+  animProgress = 0;
+  if (animReq) cancelAnimationFrame(animReq);
+  
+  function step() {
+    animProgress += 0.001; // Kecepatan gerak animasi (semakin besar semakin cepat)
+    if (animProgress > 1) animProgress = 1;
+    draw();
+    if (animProgress < 1) {
+      animReq = requestAnimationFrame(step);
+    }
+  }
+  step();
+}
+
 const ALGO_META = {
   dfs: {
     label: "DFS",
@@ -73,7 +91,9 @@ function runAll() {
   results.hc   = hcRes;
 
   renderCards();
-  draw();
+  activeTab = "compare"; 
+  updateInfo();
+  startAnimation(); 
 }
 
 // ── Render Kartu Hasil ─────────────────────────────────────
@@ -114,7 +134,7 @@ function setTab(tab) {
     btn.classList.toggle("active", btn.dataset.tab === tab)
   );
   updateInfo();
-  draw();
+  startAnimation(); 
 }
 
 function updateInfo() {
@@ -164,14 +184,47 @@ function draw() {
     const r = results[key];
     if (!r || !r.path.length) continue;
     const m = ALGO_META[key];
+    
     ctx.beginPath();
     ctx.moveTo(px(r.path[0]), py(r.path[0]));
-    for (let i = 1; i < r.path.length; i++) ctx.lineTo(px(r.path[i]), py(r.path[i]));
+    
+    // Hitung kemajuan segmen rute
+    const totalSegments = r.path.length - 1;
+    const currentTotalProgress = animProgress * totalSegments;
+    const currentSegmentIndex = Math.floor(currentTotalProgress);
+    const segmentProgress = currentTotalProgress - currentSegmentIndex;
+
+    // 2a. Gambar garis yang sudah dilewati sepenuhnya
+    for (let i = 1; i <= currentSegmentIndex; i++) {
+      ctx.lineTo(px(r.path[i]), py(r.path[i]));
+    }
+
+    // 2b. Gambar garis parsial yang sedang bergerak
+    let currentX = px(r.path[currentSegmentIndex]);
+    let currentY = py(r.path[currentSegmentIndex]);
+
+    if (currentSegmentIndex < totalSegments) {
+      const nextX = px(r.path[currentSegmentIndex + 1]);
+      const nextY = py(r.path[currentSegmentIndex + 1]);
+      // Interpolasi koordinat untuk efek meluncur
+      currentX = currentX + (nextX - currentX) * segmentProgress;
+      currentY = currentY + (nextY - currentY) * segmentProgress;
+      ctx.lineTo(currentX, currentY);
+    }
+
     ctx.strokeStyle = m.color;
     ctx.lineWidth   = m.width;
     ctx.setLineDash(m.dash);
     ctx.stroke();
     ctx.setLineDash([]);
+
+    // 2c. Tambahkan indikator titik bulat di ujung rute yang sedang bergerak
+    if (animProgress < 1 && totalSegments > 0) {
+      ctx.beginPath();
+      ctx.arc(currentX, currentY, Math.max(m.width * 1.5, 4), 0, Math.PI * 2);
+      ctx.fillStyle = m.color;
+      ctx.fill();
+    }
   }
 
   // 3. Semua node
