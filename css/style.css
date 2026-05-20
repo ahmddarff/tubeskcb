@@ -1,4 +1,4 @@
-/* style.css — Pathfinder Sumatera */
+/* style.css — Pathfinder Sumatera (Leaflet Version) */
 
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
@@ -76,12 +76,35 @@ select:focus { border-color: var(--accent); }
 .tab-btn:hover  { background: var(--bg); color: var(--text); }
 .tab-btn.active { background: var(--text); color: #fff; border-color: transparent; }
 
-/* Canvas */
+/* ── MAP CONTAINER (LEAFLET) ── */
 .canvas-wrap {
-  border: 0.5px solid var(--border); border-radius: var(--radius-sm);
-  overflow: hidden; background: var(--bg); margin-bottom: 10px;
+  border: 0.5px solid var(--border); 
+  border-radius: var(--radius-sm);
+  overflow: hidden; 
+  background: var(--bg); 
+  margin-bottom: 10px;
 }
-#map-canvas { display: block; width: 100%; height: 400px; }
+
+#map { 
+  display: block; 
+  width: 100%; 
+  height: 400px;
+  z-index: 1; /* Mencegah map menutupi elemen dropdown (select) jika terbuka */
+}
+
+/* Kustomisasi Teks Nama Kota di Leaflet */
+.city-label {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-size: 10px;
+  color: rgba(80,80,80,0.85);
+  font-family: 'DM Sans', sans-serif;
+}
+.bold-label {
+  font-weight: 500;
+  font-size: 11px;
+}
 
 /* Legend */
 .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 1.25rem; }
