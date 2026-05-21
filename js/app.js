@@ -20,7 +20,7 @@ function startAnimation() {
   if (animReq) cancelAnimationFrame(animReq); //
   
   function step() {
-    animProgress += 0.002; // Ditingkatkan kecepatannya sedikit karena render Leaflet berbeda dengan canvas
+    animProgress += 0.008; // Ditingkatkan kecepatannya sedikit karena render Leaflet berbeda dengan canvas
     if (animProgress > 1) animProgress = 1; //
     draw();
     if (animProgress < 1) {
@@ -180,8 +180,8 @@ function draw() {
     const isReached = reachedNodes.has(name) && !isKey; //
     const coords = [NODES[name].lat, NODES[name].lon];
 
-    let markerColor = isKey ? "#1D9E75" : (isReached ? dynamicColor : "#ffffff"); //
-    let strokeColor = isKey ? "#0F6E56" : (isReached ? dynamicColor : "rgba(100,100,100,0.35)"); //
+    let markerColor = isKey ? "#1D9E75" : (isReached ? dynamicColor : "#1d4ed8");
+    let strokeColor = isKey ? "#0F6E56" : (isReached ? dynamicColor : "#1e40af");
 
     const marker = L.circleMarker(coords, {
       radius: isKey ? 8 : (isReached ? 6.5 : 5), //
