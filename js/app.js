@@ -91,11 +91,56 @@ function runAll() {
   startAnimation(); //
 }
 
-// ── Render Kartu Hasil & Tab tetap sama seperti bawaan ──
-function renderCards() { /* ... kode asli tetap dipertahankan ... */ } //
-function setTab(tab) { activeTab = tab; updateInfo(); startAnimation(); } //
-function updateInfo() { /* ... kode asli tetap dipertahankan ... */ } //
+function renderCards() {
+  const keys = ["dfs", "astar", "hc"];
+  const minDist = Math.min(
+    ...keys.filter((k) => results[k]?.found).map((k) => results[k].dist)
+  );
 
+  document.getElementById("result-cards").innerHTML = keys.map((key) => {
+    const r = results[key];
+    const m = ALGO_META[key];
+    const best = r.found && r.dist === minDist;
+    return `
+      <div class="res-card${best ? " best" : ""}${r.found ? "" : " failed"}">
+        <div class="res-algo-label" style="color:${m.color}">
+          ${m.label}
+          ${best       ? '<span class="badge-best">Terpendek</span>' : ""}
+          ${!r.found   ? '<span class="badge-fail">Gagal</span>'     : ""}
+        </div>
+        <div class="res-dist">${r.found ? r.dist.toLocaleString() + " km" : "—"}</div>
+        <div class="res-meta">${r.explored} node · ${r.timeMs} ms</div>
+        <div class="res-path">${
+          r.found
+            ? formatPath(r.path)
+            : r.stuckAt
+            ? "Terjebak di: " + r.stuckAt
+            : "Tidak ditemukan"
+        }</div>
+      </div>`;
+  }).join("");
+}
+
+// ── Tab ────────────────────────────────────────────────────
+function setTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll(".tab-btn").forEach((btn) =>
+    btn.classList.toggle("active", btn.dataset.tab === tab)
+  );
+  updateInfo();
+  startAnimation(); 
+}
+
+function updateInfo() {
+  const map = {
+    map:     `Graf rute darat <b>${Object.keys(NODES).length} kota</b> dan <b>${EDGES.length} ruas jalan</b>. Pilih kota dan klik <b>Jalankan Algoritma</b>.`,
+    dfs:     ALGO_META.dfs.desc,
+    astar:   ALGO_META.astar.desc,
+    hc:      ALGO_META.hc.desc,
+    compare: `Mode <b>Perbandingan</b>: semua jalur ditampilkan sekaligus. Solid tebal = A* (optimal), putus panjang = DFS, putus pendek = Hill Climbing.`,
+  };
+  document.getElementById("info-panel").innerHTML = map[activeTab] || map.map;
+}
 
 // ── Leaflet Drawing Engine (PENGGANTI CANVAS DRAW) ──────────
 function draw() {
@@ -106,15 +151,33 @@ function draw() {
   markerLayers.clearLayers();
 
   // 1. Gambar Semua Ruas Jalan Dasar (Edges) — Abu-abu Tipis
-  for (const [a, b] of EDGES) { //
+  // Kita tambahkan parameter 'w' (weight/jarak) dari data EDGES
+  for (const [a, b, w] of EDGES) { 
     const latlngs = [
       [NODES[a].lat, NODES[a].lon],
       [NODES[b].lat, NODES[b].lon]
     ];
+    
+    // Gambar garis jalannya
     L.polyline(latlngs, {
       color: "rgba(140,140,140,0.4)",
       weight: 1.5
     }).addTo(pathLayers);
+
+    // Hitung titik tengah antara kota A dan kota B
+    const midLat = (NODES[a].lat + NODES[b].lat) / 2;
+    const midLon = (NODES[a].lon + NODES[b].lon) / 2;
+
+    // Pasang label jarak (Tooltip) persis di titik tengah
+    L.tooltip({
+      permanent: true,
+      direction: 'center',
+      className: 'edge-label',
+      interactive: false // Agar tidak menghalangi kursor saat peta digeser
+    })
+    .setLatLng([midLat, midLon])
+    .setContent(`${w} km`) // Menampilkan angka jaraknya
+    .addTo(pathLayers);
   }
 
   // 2. Highlight Jalur Berdasarkan Tab Aktif
