@@ -1,98 +1,139 @@
 /**
  * graph.js
  * Data graf kota-kota di Sumatera beserta jarak antar kota (km)
- * Studi kasus: Rute darat Medan → Palembang
+ * Studi kasus: Rute darat Medan → Pekanbaru (Detail Tinggi & Lintas Tengah)
  */
 
 const NODES = {
-  Medan:              { lat: 3.59519,  lon: 98.67222 },
-  Tebing:             { lat: 3.32628,  lon: 99.15668 },
-  Kisaran:            { lat: 2.98316,  lon: 99.62787 },
-  Pematangsiantar:    { lat: 2.96514,  lon: 99.06263 },
-  Rantauprapat:       { lat: 2.10084,  lon: 99.82878 },
-  Padangsidimpuan:    { lat: 1.37218,  lon: 99.27301 },
-  Sibolga:            { lat: 1.74061,  lon: 98.78234 },
-  Pekanbaru:          { lat: 0.50706,  lon: 101.44777 },
-  Duri:               { lat: 1.25961,  lon: 101.21309 },
-  Dumai:              { lat: 1.66663,  lon: 101.40018 },
-  Bukittinggi:        { lat: -0.30391, lon: 100.38347 },
-  Padang:             { lat: -0.94804, lon: 100.36309 },
-  Solok:              { lat: -0.78853, lon: 100.65498 },
-  Muarabungo:         { lat: -1.48327, lon: 102.11692 },
-  Jambi:              { lat: -1.61012, lon: 103.61312 },
-  Curup:              { lat: -3.47407, lon: 102.52119 },
-  Lubuklinggau:       { lat: -3.29958, lon: 102.85723 },
-  Lahat:              { lat: -3.78562, lon: 103.54079 },
-  Muaraenim:          { lat: -3.66322, lon: 103.77816 },
-  Prabumulih:         { lat: -3.42137, lon: 104.24368 },
-  Palembang:          { lat: -2.97607, lon: 104.77543 },
+  // === CABANG 1: AREA MEDAN & PERCABANGAN AWAL ===
+  Medan:              { lat: 3.59519, lon: 98.67222 },
+  PancurBatu:         { lat: 3.47966, lon: 98.59689 },
+  LubukPakam:         { lat: 3.56633, lon: 98.87515 },
 
-  PancurBatu:         { lat: 0, lon: 0 },
-  Berastagi:          { lat: 0, lon: 0 },
-  Kabanjahe:          { lat: 0, lon: 0 },
-  Indrapura:          { lat: 0, lon: 0 },
-  Prapat:             { lat: 0, lon: 0 },
-  Porsea:             { lat: 0, lon: 0 },
-  Balige:             { lat: 0, lon: 0 },
-  Tarutung:           { lat: 0, lon: 0 },
-  BaganBatu:          { lat: 0, lon: 0 },
-  Kandis:             { lat: 0, lon: 0 },
-  TelukKuantan:       { lat: 0, lon: 0 },
+  // === CABANG 2: JALUR PEGUNUNGAN KARO (Alternatif Siantar/Toba) ===
+  Berastagi:          { lat: 3.18529, lon: 98.50491 },
+  Kabanjahe:          { lat: 3.10502, lon: 98.4985 },
+  Merek:              { lat: 2.94122, lon: 98.51847 },
+  Saribudolok:        { lat: 2.93704, lon: 98.61119 },
+
+  // === CABANG 3: JALUR LINTAS TIMUR (Via Perbaungan / Galang) ===
+  Perbaungan:         { lat: 3.56822, lon: 98.94714 },
+  SeiRampah:          { lat: 3.49338, lon: 99.12438 },
+  Galang:             { lat: 3.43137, lon: 98.90006 },
+  DolokMasihul:       { lat: 3.33635, lon: 99.01576 },
+  Tebing:             { lat: 3.32628, lon: 99.15668 },
+  
+  // === CABANG 4: JALUR PESISIR ASAHAN & LABUHANBATU ===
+  Indrapura:          { lat: 3.28821, lon: 99.37147 },
+  LimaPuluh:          { lat: 3.16821, lon: 99.41879 },
+  Kisaran:            { lat: 2.98316, lon: 99.62787 },
+  TanjungBalai:       { lat: 2.96594, lon: 99.79835 }, // Cabang Buntu
+  SimpangAmpat:       { lat: 2.92259, lon: 99.7315 },
+  UlakMedan:          { lat: 2.71353, lon: 99.61347 },
+  AekKanopan:         { lat: 2.56749, lon: 99.61743 },
+  Rantauprapat:       { lat: 2.10084, lon: 99.82878 },
+  Kotapinang:         { lat: 1.89065, lon: 100.09002 },
+
+  // === CABANG 5: JALUR LINTAS TENGAH (Via Danau Toba & Tapsel) ===
+  Pematangsiantar:    { lat: 2.96514, lon: 99.06263 },
+  Prapat:             { lat: 2.66251, lon: 98.93416 },
+  Porsea:             { lat: 2.46173, lon: 99.13601 },
+  Balige:             { lat: 2.33371, lon: 99.08325 },
+  Tarutung:           { lat: 2.01188, lon: 98.97977 },
+  Sibolga:            { lat: 1.74061, lon: 98.78234 }, // Cabang Buntu Pantai Barat
+  Padangsidimpuan:    { lat: 1.37218, lon: 99.27301 },
+  GunungTua:          { lat: 1.03017, lon: 99.80551 },
+
+  // === CABANG 6: AREA RIAU UTARA (Jalur Minyak & Tol) ===
+  BaganBatu:          { lat: 1.7013, lon: 100.40505 },
+  UjungTanjung:       { lat: 1.61585, lon: 101.15041 },
+  Dumai:              { lat: 1.66663, lon: 101.40018 }, // Cabang Buntu Pantai Timur
+  Duri:               { lat: 1.25961, lon: 101.21309 },
+  Kandis:             { lat: 1.00118, lon: 101.11644 },
+  Minas:              { lat: 0.74261, lon: 0.74261 },
+
+  // === CABANG 7: AREA RIAU TENGAH & PEKANBARU SEKITARNYA ===
+  PasirPengarayan:    { lat: 0.86198, lon: 100.2955 },
+  Bangkinang:         { lat: 0.34135, lon: 101.02795 },
+  Perawang:           { lat: 0.67343, lon: 0.67343 },
+  Pekanbaru:          { lat: 0.50706, lon: 101.44777 },
+  Siak:               { lat: 0.81188, lon: 0.81188 }, // Cabang Buntu
 };
 
 // [kotaA, kotaB, jarak_km] — graf tidak berarah
 const EDGES = [
-  ["Medan", "Tebing", 83],
-  ["Medan", "Pematangsiantar", 125],
-  ["Tebing", "Kisaran", 87],
-  ["Tebing", "Pematangsiantar", 46],
-  ["Rantauprapat", "BaganBatu", 0],
-  ["BaganBatu", "Duri", 0],  
-  ["Rantauprapat", "Padangsidimpuan", 164],
-  
-  ["Padangsidimpuan", "Sibolga", 88],
-  ["Padangsidimpuan", "Bukittinggi", 290],
-  ["Sibolga", "Bukittinggi", 378],
-  
-  ["Duri", "Kandis", 0],
-  ["Kandis", "Pekanbaru", 0],
-  ["Duri", "Dumai", 78],
-  ["Pekanbaru", "Bukittinggi", 212],
-  ["Pekanbaru", "TelukKuantan", 0],
-  ["TelukKuantan", "Muarabungo", 0],
-  ["Pekanbaru", "Jambi", 458],
-  ["Bukittinggi", "Padang", 97],
-  ["Bukittinggi", "Solok", 74],
-  ["Solok", "Muarabungo", 228],
-  ["Solok", "Padang", 58],
-  ["Muarabungo", "Jambi", 243],
-  ["Muarabungo", "Curup", 344],
-  ["Jambi", "Palembang", 269],
-  ["Jambi", "Muaraenim", 331],
-  ["Curup", "Lubuklinggau", 56],
-  ["Curup", "Lahat", 187],
-  ["Lubuklinggau", "Lahat", 152],
-  ["Lubuklinggau", "Muaraenim", 182],
-  ["Lahat", "Muaraenim", 43],
-  ["Muaraenim", "Prabumulih", 85],
-  ["Muaraenim", "Palembang", 188],
-  ["Prabumulih", "Palembang", 112],
+  // --- AWALAN DARI MEDAN ---
+  ["Medan", "PancurBatu", 0], // Membuka jalur Pegunungan
+  ["Medan", "LubukPakam", 0], // Membuka jalur Lintas Timur
 
-  ["Medan", "PancurBatu", 0],
+  // --- CABANG 2: JALUR PEGUNUNGAN KARO ---
   ["PancurBatu", "Berastagi", 0],
   ["Berastagi", "Kabanjahe", 0],
+  ["Kabanjahe", "Merek", 0],
+  ["Merek", "Saribudolok", 0],
+  // Tembusan dari gunung ke lintas tengah:
+  ["Saribudolok", "Pematangsiantar", 0],
+  ["Saribudolok", "Prapat", 0],
+
+  // --- CABANG 3: PERCABANGAN PAKAM - TEBING TINGGI ---
+  // Sub-jalur 3A: Pesisir / Tol
+  ["LubukPakam", "Perbaungan", 0],
+  ["Perbaungan", "SeiRampah", 0],
+  ["SeiRampah", "Tebing", 0],
+  // Sub-jalur 3B: Dalam / Perkebunan
+  ["LubukPakam", "Galang", 0],
+  ["Galang", "DolokMasihul", 0],
+  ["DolokMasihul", "Tebing", 0],
   
+  // --- CABANG 4: JALUR PESISIR ASAHAN & LABUHANBATU ---
   ["Tebing", "Indrapura", 0],
-  ["Indrapura", "Kisaran", 0],
+  ["Indrapura", "LimaPuluh", 0],
+  ["LimaPuluh", "Kisaran", 0],
+  ["Kisaran", "TanjungBalai", 0], // Buntu
   
-  ["Kisaran", "Rantauprapat", 0],
+  // Detail Kisaran -> Aek Kanopan via Simpang Ampat
+  ["Kisaran", "SimpangAmpat", 0],
+  ["SimpangAmpat", "UlakMedan", 0],
+  ["UlakMedan", "AekKanopan", 0],
   
+  ["AekKanopan", "Rantauprapat", 0],
+  ["Rantauprapat", "Kotapinang", 0],
+  ["Kotapinang", "BaganBatu", 0],
+
+  // --- CABANG 5: JALUR LINTAS TENGAH (Via Danau Toba & Tapsel) ---
+  ["Tebing", "Pematangsiantar", 46],
   ["Pematangsiantar", "Prapat", 0],
   ["Prapat", "Porsea", 0],
+  
+  // SHORTCUT MAUT (Porsea tembus langsung ke Ulak Medan)
+  ["Porsea", "UlakMedan", 0], 
+  
   ["Porsea", "Balige", 0],
   ["Balige", "Tarutung", 0], 
-  ["Tarutung", "Sibolga", 0],
+  ["Tarutung", "Sibolga", 0], // Buntu
   ["Tarutung", "Padangsidimpuan", 0],
+  ["Sibolga", "Padangsidimpuan", 88],
+  
+  // Lintas Tengah ke Riau (Padangsidimpuan -> Riau Selatan)
+  ["Padangsidimpuan", "GunungTua", 0],
+  ["GunungTua", "PasirPengarayan", 0],
+  ["PasirPengarayan", "Bangkinang", 0],
+
+  // --- CABANG 6: AREA RIAU UTARA (Lintas Timur Lanjutan) ---
+  ["BaganBatu", "UjungTanjung", 0],
+  ["UjungTanjung", "Dumai", 0], // Memecah ke Dumai
+  ["UjungTanjung", "Duri", 0],  // Memecah ke Duri
+  ["Dumai", "Duri", 78],        // Tol penghubung
+  ["Duri", "Kandis", 0],
+  ["Kandis", "Minas", 0],
+
+  // --- CABANG 7: PERTEMUAN AKHIR DI PEKANBARU ---
+  ["Minas", "Pekanbaru", 0],      // Jalur Lintas Utama (Lurus)
+  ["Minas", "Perawang", 0],       // Belok ke jalur industri
+  ["Perawang", "Pekanbaru", 0],   // Tembus Pekanbaru via PT SIR / Maredan
+  ["Perawang", "Siak", 0],        // Akses menuju Siak (Buntu)
+
+  ["Bangkinang", "Pekanbaru", 0], // Pertemuan dari Lintas Tengah
 ];
 
 function buildAdjacency() {
