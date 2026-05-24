@@ -56,59 +56,76 @@ const ALGO_META = { //
 
 // ── Jalankan Semua Algoritma ───────────────────────────────
 function runAll() {
-  const start = document.getElementById("sel-start").value; //
-  const goal  = document.getElementById("sel-goal").value; //
+  const start = document.getElementById("sel-start").value;
+  const goal  = document.getElementById("sel-goal").value;
+  const mode  = document.getElementById("sel-mode").value; // Membaca mode pilihan user
 
-  if (start === goal) { //
-    document.getElementById("info-panel").innerHTML = "<b>Pilih kota asal dan tujuan yang berbeda ya!</b>"; //
-    return; //
+  if (start === goal) {
+    document.getElementById("info-panel").innerHTML = "<b>Pilih kota asal dan tujuan yang berbeda ya!</b>";
+    return;
   }
 
-  // Jalankan DFS
-  let t = performance.now(); //
-  const dfsRes = dfs(start, goal, adj); //
-  dfsRes.timeMs  = (performance.now() - t).toFixed(3); //
-  dfsRes.dist    = pathDistance(dfsRes.path); //
-  results.dfs    = dfsRes; //
+  // 1. Siapkan data jalan dan rumus estimasi sesuai mode yang dipilih
+  const currentAdj = buildAdjacency(mode);
+  const currentHeuristic = mode === "time" ? haversineTime : haversine;
 
-  // Jalankan A*
-  t = performance.now(); //
-  const astarRes = astar(start, goal, adj, NODES, haversine); //
-  astarRes.timeMs = (performance.now() - t).toFixed(3); //
-  astarRes.dist   = pathDistance(astarRes.path); //
-  results.astar   = astarRes; //
+  // 2. Jalankan DFS
+  let t = performance.now();
+  const dfsRes = dfs(start, goal, currentAdj);
+  dfsRes.timeMs  = (performance.now() - t).toFixed(3);
+  const dfsStats = calculatePathStats(dfsRes.path);
+  dfsRes.dist = dfsStats.dist;
+  dfsRes.time = dfsStats.time;
+  dfsRes.weight = mode === "time" ? dfsStats.time : dfsStats.dist;
+  results.dfs = dfsRes;
 
-  // Jalankan Hill Climbing
-  t = performance.now(); //
-  const hcRes = hillClimbing(start, goal, adj, NODES, haversine); //
-  hcRes.timeMs = (performance.now() - t).toFixed(3); //
-  hcRes.dist   = pathDistance(hcRes.path); //
-  results.hc   = hcRes; //
+  // 3. Jalankan A* (Gunakan fungsi heuristik dinamis)
+  t = performance.now();
+  const astarRes = astar(start, goal, currentAdj, NODES, currentHeuristic);
+  astarRes.timeMs = (performance.now() - t).toFixed(3);
+  const astarStats = calculatePathStats(astarRes.path);
+  astarRes.dist = astarStats.dist;
+  astarRes.time = astarStats.time;
+  astarRes.weight = mode === "time" ? astarStats.time : astarStats.dist;
+  results.astar = astarRes;
 
-  renderCards(); //
-  activeTab = "compare"; //
-  updateInfo(); //
-  startAnimation(); //
+  // 4. Jalankan Hill Climbing
+  t = performance.now();
+  const hcRes = hillClimbing(start, goal, currentAdj, NODES, currentHeuristic);
+  hcRes.timeMs = (performance.now() - t).toFixed(3);
+  const hcStats = calculatePathStats(hcRes.path);
+  hcRes.dist = hcStats.dist;
+  hcRes.time = hcStats.time;
+  hcRes.weight = mode === "time" ? hcStats.time : hcStats.dist;
+  results.hc = hcRes;
+
+  renderCards();
+  activeTab = "compare";
+  updateInfo();
+  startAnimation();
 }
 
 function renderCards() {
   const keys = ["dfs", "astar", "hc"];
-  const minDist = Math.min(
-    ...keys.filter((k) => results[k]?.found).map((k) => results[k].dist)
+  // Cari bobot terkecil (entah itu km terpendek atau waktu tercepat)
+  const minWeight = Math.min(
+    ...keys.filter((k) => results[k]?.found).map((k) => results[k].weight)
   );
 
   document.getElementById("result-cards").innerHTML = keys.map((key) => {
     const r = results[key];
     const m = ALGO_META[key];
-    const best = r.found && r.dist === minDist;
+    const best = r.found && r.weight === minWeight;
     return `
       <div class="res-card${best ? " best" : ""}${r.found ? "" : " failed"}">
         <div class="res-algo-label" style="color:${m.color}">
           ${m.label}
-          ${best       ? '<span class="badge-best">Terpendek</span>' : ""}
+          ${best       ? '<span class="badge-best">Paling Optimal</span>' : ""}
           ${!r.found   ? '<span class="badge-fail">Gagal</span>'     : ""}
         </div>
-        <div class="res-dist">${r.found ? r.dist.toLocaleString() + " km" : "—"}</div>
+        <div class="res-dist" style="font-size: 18px;">
+          ${r.found ? `${r.dist.toLocaleString()} km <br> <span style="font-size:14px; color:var(--muted)">⏱️ ${formatTime(r.time)}</span>` : "—"}
+        </div>
         <div class="res-meta">${r.explored} node · ${r.timeMs} ms</div>
         <div class="res-path">${
           r.found

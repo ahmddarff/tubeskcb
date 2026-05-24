@@ -60,101 +60,113 @@ const NODES = {
   Siak:               { lat: 0.81188, lon: 101.79796 }, // Cabang Buntu
 };
 
-// [kotaA, kotaB, jarak_km] — graf tidak berarah
+// [kotaA, kotaB, jarak_km, waktu_menit] — graf tidak berarah
 const EDGES = [
   // --- AWALAN DARI MEDAN ---
-  ["Medan", "PancurBatu", 17.4], // Membuka jalur Pegunungan
-  ["Medan", "LubukPakam", 36.8], // Membuka jalur Lintas Timur
+  ["Medan", "PancurBatu", 17.4, 0], // Membuka jalur Pegunungan
+  ["Medan", "LubukPakam", 36.8, 0], // Membuka jalur Lintas Timur
 
   // --- CABANG 2: JALUR PEGUNUNGAN KARO ---
-  ["PancurBatu", "Berastagi", 47.6],
-  ["Berastagi", "Kabanjahe", 9.8],
-  ["Kabanjahe", "Merek", 28.6],
-  ["Merek", "Saribudolok", 16.2],
+  ["PancurBatu", "Berastagi", 47.6, 0],
+  ["Berastagi", "Kabanjahe", 9.8, 0],
+  ["Kabanjahe", "Merek", 28.6, 0],
+  ["Merek", "Saribudolok", 16.2, 0],
   // Tembusan dari gunung ke lintas tengah:
-  ["Saribudolok", "Pematangsiantar", 62.5],
-  ["Saribudolok", "Prapat", 66.1],
+  ["Saribudolok", "Pematangsiantar", 62.5, 0],
+  ["Saribudolok", "Prapat", 66.1, 0],
 
   // --- CABANG 3: PERCABANGAN PAKAM - TEBING TINGGI ---
   // Sub-jalur 3A: Pesisir / Tol
-  ["LubukPakam", "Perbaungan", 11],
-  ["Perbaungan", "SeiRampah", 27],
-  ["SeiRampah", "Tebing", 21.2],
+  ["LubukPakam", "Perbaungan", 11, 0],
+  ["Perbaungan", "SeiRampah", 27, 0],
+  ["SeiRampah", "Tebing", 21.2, 0],
   // Sub-jalur 3B: Dalam / Perkebunan
-  ["LubukPakam", "Galang", 16.9],
-  ["Galang", "DolokMasihul", 22.3],
-  ["DolokMasihul", "Tebing", 19.8],
+  ["LubukPakam", "Galang", 16.9, 0],
+  ["Galang", "DolokMasihul", 22.3, 0],
+  ["DolokMasihul", "Tebing", 19.8, 0],
   
   // --- CABANG 4: JALUR PESISIR ASAHAN & LABUHANBATU ---
-  ["Tebing", "Indrapura", 41.8],
-  ["Indrapura", "LimaPuluh", 18.3],
-  ["LimaPuluh", "Kisaran", 45.5],
-  ["Kisaran", "TanjungBalai", 22.7], // Buntu
+  ["Tebing", "Indrapura", 41.8, 0],
+  ["Indrapura", "LimaPuluh", 18.3, 0],
+  ["LimaPuluh", "Kisaran", 45.5, 0],
+  ["Kisaran", "TanjungBalai", 22.7, 0], // Buntu
   
   // Detail Kisaran -> Aek Kanopan via Simpang Ampat
-  ["Kisaran", "SimpangAmpat", 15.5],
-  ["SimpangAmpat", "UlakMedan", 29.6],
-  ["UlakMedan", "AekKanopan", 22.3],
+  ["Kisaran", "SimpangAmpat", 15.5, 0],
+  ["SimpangAmpat", "UlakMedan", 29.6, 0],
+  ["UlakMedan", "AekKanopan", 22.3, 0],
   
-  ["AekKanopan", "Rantauprapat", 71.9],
-  ["Rantauprapat", "Kotapinang", 54.3],
-  ["Kotapinang", "BaganBatu", 52.1],
+  ["AekKanopan", "Rantauprapat", 71.9, 0],
+  ["Rantauprapat", "Kotapinang", 54.3, 0],
+  ["Kotapinang", "BaganBatu", 52.1, 0],
 
   // --- CABANG 5: JALUR LINTAS TENGAH (Via Danau Toba & Tapsel) ---
-  ["Tebing", "Pematangsiantar", 45.8],
-  ["Pematangsiantar", "Prapat", 48.8],
-  ["Prapat", "Porsea", 41.1],
+  ["Tebing", "Pematangsiantar", 45.8, 0],
+  ["Pematangsiantar", "Prapat", 48.8, 0],
+  ["Prapat", "Porsea", 41.1, 0],
   
   // SHORTCUT MAUT (Porsea tembus langsung ke Ulak Medan)
-  ["Porsea", "UlakMedan", 88.7], 
+  ["Porsea", "UlakMedan", 88.7, 0], 
   
-  ["Porsea", "Balige", 24.9],
-  ["Balige", "Tarutung", 52.3], 
-  ["Tarutung", "Sibolga", 64.5], // Buntu
-  ["Tarutung", "Padangsidimpuan", 104],
-  ["Sibolga", "Padangsidimpuan", 88.2],
+  ["Porsea", "Balige", 24.9, 0],
+  ["Balige", "Tarutung", 52.3, 0], 
+  ["Tarutung", "Sibolga", 64.5, 0], // Buntu
+  ["Tarutung", "Padangsidimpuan", 104, 0],
+  ["Sibolga", "Padangsidimpuan", 88.2, 0],
   
   // Lintas Tengah ke Riau (Padangsidimpuan -> Riau Selatan)
-  ["Padangsidimpuan", "GunungTua", 62.8],
-  ["GunungTua", "PasirPengarayan", 170],
-  ["PasirPengarayan", "Bangkinang", 121],
+  ["Padangsidimpuan", "GunungTua", 62.8, 0],
+  ["GunungTua", "PasirPengarayan", 170, 0],
+  ["PasirPengarayan", "Bangkinang", 121, 0],
 
   // --- CABANG 6: AREA RIAU UTARA (Lintas Timur Lanjutan) ---
-  ["BaganBatu", "UjungTanjung", 104],
-  ["UjungTanjung", "Dumai", 48], // Memecah ke Dumai
-  ["UjungTanjung", "Duri", 55.8],  // Memecah ke Duri
-  ["Dumai", "Duri", 74.4],        // Tol penghubung
-  ["Duri", "Kandis", 58.7],
-  ["Kandis", "Minas", 65.4],
+  ["BaganBatu", "UjungTanjung", 104, 0],
+  ["UjungTanjung", "Dumai", 48, 0], // Memecah ke Dumai
+  ["UjungTanjung", "Duri", 55.8, 0],  // Memecah ke Duri
+  ["Dumai", "Duri", 74.4, 0],        // Tol penghubung
+  ["Duri", "Kandis", 58.7, 0],
+  ["Kandis", "Minas", 65.4, 0],
 
   // --- CABANG 7: PERTEMUAN AKHIR DI PEKANBARU ---
-  ["Minas", "Pekanbaru", 29.9],      // Jalur Lintas Utama (Lurus)
-  ["Minas", "Perawang", 24.8],       // Belok ke jalur industri
-  ["Perawang", "Pekanbaru", 39.5],   // Tembus Pekanbaru via PT SIR / Maredan
-  ["Perawang", "Siak", 52],        // Akses menuju Siak (Buntu)
+  ["Minas", "Pekanbaru", 29.9, 0],      // Jalur Lintas Utama (Lurus)
+  ["Minas", "Perawang", 24.8, 0],       // Belok ke jalur industri
+  ["Perawang", "Pekanbaru", 39.5, 0],   // Tembus Pekanbaru via PT SIR / Maredan
+  ["Perawang", "Siak", 52, 0],        // Akses menuju Siak (Buntu)
 
-  ["Bangkinang", "Pekanbaru", 65.9], // Pertemuan dari Lintas Tengah
+  ["Bangkinang", "Pekanbaru", 65.9, 0], // Pertemuan dari Lintas Tengah
 ];
 
-function buildAdjacency() {
+// Fungsi ini sekarang bisa menerima mode ("dist" atau "time")
+function buildAdjacency(mode = "dist") {
   const adj = {};
   for (const name in NODES) adj[name] = [];
-  for (const [a, b, w] of EDGES) {
+  for (const [a, b, d, t] of EDGES) {
+    // Jika temanmu belum selesai mengisi waktu, kita pakai nilai jarak sebagai cadangan sementara agar tidak error
+    const timeVal = t !== undefined ? t : d; 
+    
+    // Tentukan bobot (weight) mana yang akan dipakai AI
+    const w = mode === "time" ? timeVal : d;
+    
     adj[a].push({ to: b, weight: w });
     adj[b].push({ to: a, weight: w });
   }
   return adj;
 }
 
-function pathDistance(path) {
-  let total = 0;
+// Fungsi ini dirombak untuk menghitung Total Jarak DAN Total Waktu sekaligus
+function calculatePathStats(path) {
+  let dist = 0;
+  let time = 0;
   for (let i = 0; i < path.length - 1; i++) {
     const edge = EDGES.find(
       ([a, b]) =>
         (a === path[i] && b === path[i + 1]) ||
         (b === path[i] && a === path[i + 1])
     );
-    if (edge) total += edge[2];
+    if (edge) {
+      dist += edge[2];
+      time += edge[3] !== undefined ? edge[3] : edge[2];
+    }
   }
-  return total;
+  return { dist, time };
 }
