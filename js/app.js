@@ -142,161 +142,145 @@ function updateInfo() {
   document.getElementById("info-panel").innerHTML = map[activeTab] || map.map;
 }
 
-// ── Leaflet Drawing Engine (PENGGANTI CANVAS DRAW) ──────────
+// ── Leaflet Drawing Engine (DIOPTIMALKAN ANTI LAG) ──────────
+
+// Kita buat dua layer terpisah:
+let baseLayers; // Layer untuk jalan abu-abu & label (Statis - Digambar 1x)
+let animLayers; // Layer untuk animasi rute (Dinamis - Digambar 60x/detik)
+
+// Fungsi baru untuk menggambar peta dasar (Hanya dipanggil sekali)
+function drawBaseMap() {
+  baseLayers.clearLayers();
+
+  // 1. Gambar Semua Ruas Jalan Dasar & Jaraknya
+  for (const [a, b, w] of EDGES) { 
+    const latlngs = [[NODES[a].lat, NODES[a].lon], [NODES[b].lat, NODES[b].lon]];
+    L.polyline(latlngs, { color: "rgba(140,140,140,0.4)", weight: 1.5 }).addTo(baseLayers);
+
+    const midLat = (NODES[a].lat + NODES[b].lat) / 2;
+    const midLon = (NODES[a].lon + NODES[b].lon) / 2;
+    L.tooltip({ permanent: true, direction: 'center', className: 'edge-label', interactive: false })
+      .setLatLng([midLat, midLon]).setContent(`${w} km`).addTo(baseLayers);
+  }
+
+  // 2. Gambar Semua Titik Kota Dasar & Namanya
+  for (const name in NODES) { 
+    const coords = [NODES[name].lat, NODES[name].lon];
+    const marker = L.circleMarker(coords, {
+      radius: 5, fillColor: "#ffffff", color: "rgba(100,100,100,0.35)", weight: 1.5, fillOpacity: 1
+    }).addTo(baseLayers);
+
+    marker.bindTooltip(name, {
+      permanent: true, direction: "top", className: 'city-label', offset: [0, -8]
+    });
+  }
+}
+
+// Fungsi animasi yang dijalankan 60fps
 function draw() {
   if (!map) return;
 
-  // Bersihkan rute lama agar animasi tidak menumpuk berkali-kali
-  pathLayers.clearLayers();
-  markerLayers.clearLayers();
+  // HANYA hapus layer animasinya saja! Layer dasar (baseLayers) biarkan utuh.
+  animLayers.clearLayers();
 
-  // 1. Gambar Semua Ruas Jalan Dasar (Edges) — Abu-abu Tipis
-  // Kita tambahkan parameter 'w' (weight/jarak) dari data EDGES
-  for (const [a, b, w] of EDGES) { 
-    const latlngs = [
-      [NODES[a].lat, NODES[a].lon],
-      [NODES[b].lat, NODES[b].lon]
-    ];
+  const toHighlight = activeTab === "compare" ? ["dfs", "astar", "hc"] : (ALGO_META[activeTab] ? [activeTab] : []);
+  const reachedNodes = new Set();
+
+  // Gambar rute yang sedang dicari oleh AI
+  for (const key of toHighlight) { 
+    const r = results[key]; 
+    if (!r || !r.path.length) continue; 
+    const m = ALGO_META[key]; 
     
-    // Gambar garis jalannya
-    L.polyline(latlngs, {
-      color: "rgba(140,140,140,0.4)",
-      weight: 1.5
-    }).addTo(pathLayers);
-
-    // Hitung titik tengah antara kota A dan kota B
-    const midLat = (NODES[a].lat + NODES[b].lat) / 2;
-    const midLon = (NODES[a].lon + NODES[b].lon) / 2;
-
-    // Pasang label jarak (Tooltip) persis di titik tengah
-    L.tooltip({
-      permanent: true,
-      direction: 'center',
-      className: 'edge-label',
-      interactive: false // Agar tidak menghalangi kursor saat peta digeser
-    })
-    .setLatLng([midLat, midLon])
-    .setContent(`${w} km`) // Menampilkan angka jaraknya
-    .addTo(pathLayers);
-  }
-
-  // 2. Highlight Jalur Berdasarkan Tab Aktif
-  const toHighlight = activeTab === "compare" ? ["dfs", "astar", "hc"] : (ALGO_META[activeTab] ? [activeTab] : []); //
-  const reachedNodes = new Set(); //
-
-  for (const key of toHighlight) { //
-    const r = results[key]; //
-    if (!r || !r.path.length) continue; //
-    const m = ALGO_META[key]; //
-    
-    const totalSegments = r.path.length - 1; //
-    const currentTotalProgress = animProgress * totalSegments; //
-    const currentSegmentIndex = Math.floor(currentTotalProgress); //
-    const segmentProgress = currentTotalProgress - currentSegmentIndex; //
+    const totalSegments = r.path.length - 1; 
+    const currentTotalProgress = animProgress * totalSegments; 
+    const currentSegmentIndex = Math.floor(currentTotalProgress); 
+    const segmentProgress = currentTotalProgress - currentSegmentIndex; 
 
     const currentPathCoords = [];
 
-    // Ambil koordinat titik yang sudah dilalui secara penuh
     for (let i = 0; i <= currentSegmentIndex && i < r.path.length; i++) {
       currentPathCoords.push([NODES[r.path[i]].lat, NODES[r.path[i]].lon]);
-      reachedNodes.add(r.path[i]); //
+      reachedNodes.add(r.path[i]); 
     }
 
-    // Hitung interpolasi pergerakan titik rute di ujung segmen
     if (currentSegmentIndex < totalSegments) {
       const nodeA = NODES[r.path[currentSegmentIndex]];
       const nodeB = NODES[r.path[currentSegmentIndex + 1]];
-      
       const currentLat = nodeA.lat + (nodeB.lat - nodeA.lat) * segmentProgress;
       const currentLon = nodeA.lon + (nodeB.lon - nodeA.lon) * segmentProgress;
-      
       currentPathCoords.push([currentLat, currentLon]);
 
-      // Buat lingkaran kecil penanda animasi meluncur di ujung rute
       if (animProgress < 1) {
         L.circleMarker([currentLat, currentLon], {
-          radius: Math.max(m.width * 1.5, 5),
-          fillColor: m.color,
-          color: m.color,
-          fillOpacity: 1
-        }).addTo(pathLayers);
+          radius: Math.max(m.width * 1.5, 5), fillColor: m.color, color: m.color, fillOpacity: 1
+        }).addTo(animLayers);
       }
     }
 
-    // Gambar garis jalur algoritmanya di atas peta
     if (currentPathCoords.length > 1) {
-      L.polyline(currentPathCoords, {
-        color: m.color,
-        weight: m.width,
-        dashArray: m.dash
-      }).addTo(pathLayers);
+      L.polyline(currentPathCoords, { color: m.color, weight: m.width, dashArray: m.dash }).addTo(animLayers);
     }
   }
 
-  // 3. Gambar Semua Marker Kota
-  const startVal = document.getElementById("sel-start").value; //
-  const goalVal  = document.getElementById("sel-goal").value; //
-  const dynamicColor = ALGO_META[activeTab] ? ALGO_META[activeTab].color : "#6b6b68"; //
+  // Timpa warna titik kota yang dilewati agar menyala
+  const startVal = document.getElementById("sel-start").value; 
+  const goalVal  = document.getElementById("sel-goal").value; 
+  const dynamicColor = ALGO_META[activeTab] ? ALGO_META[activeTab].color : "#1d4ed8";
 
-  for (const name in NODES) { //
-    const isKey = name === startVal || name === goalVal; //
-    const isReached = reachedNodes.has(name) && !isKey; //
-    const coords = [NODES[name].lat, NODES[name].lon];
+  for (const name of reachedNodes) {
+    const isKey = name === startVal || name === goalVal;
+    if (isKey) continue; // Start/Goal ditangani terpisah di bawah
+    
+    L.circleMarker([NODES[name].lat, NODES[name].lon], {
+      radius: 6.5, fillColor: dynamicColor, color: "#1e40af", weight: 1, fillOpacity: 1
+    }).addTo(animLayers);
+  }
 
-    let markerColor = isKey ? "#1D9E75" : (isReached ? dynamicColor : "#1d4ed8");
-    let strokeColor = isKey ? "#0F6E56" : (isReached ? dynamicColor : "#1e40af");
-
-    const marker = L.circleMarker(coords, {
-      radius: isKey ? 8 : (isReached ? 6.5 : 5), //
-      fillColor: markerColor,
-      color: strokeColor,
-      weight: isKey ? 2 : 1, //
-      fillOpacity: 1
-    }).addTo(markerLayers);
-
-    // Tempelkan teks nama kota di atas penanda koordinatnya menggunakan Tooltip bawaan Leaflet
-    marker.bindTooltip(name, {
-      permanent: true,
-      direction: "top",
-      className: `city-label ${isKey || isReached ? 'bold-label' : ''}`,
-      offset: [0, -8]
-    });
+  // Pastikan warna kota Start dan Goal selalu hijau dan ada di lapisan paling atas
+  for (const name of [startVal, goalVal]) {
+    if (!NODES[name]) continue;
+    L.circleMarker([NODES[name].lat, NODES[name].lon], {
+      radius: 8, fillColor: "#1D9E75", color: "#0F6E56", weight: 2, fillOpacity: 1
+    }).addTo(animLayers);
   }
 }
 
 // ── Inisialisasi Aplikasi ──────────────────────────────────
 function init() {
-  // Inisialisasi Peta Leaflet pertama kali, pusatkan di area Sumatra Tengah
-  map = L.map('map').setView([-0.5, 101.5], 6);
+  // Pusatkan peta ke area Sumatera Bagian Tengah
+  map = L.map('map').setView([1.8, 100.0], 7);
 
-  // Load aset gambar map tiles dari server OpenStreetMap bebas royalti
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    attribution: '&copy; OpenStreetMap'
   }).addTo(map);
 
-  // Wadah layer kosong agar peta bisa dibersihkan secara dinamis
-  pathLayers = L.layerGroup().addTo(map);
-  markerLayers = L.layerGroup().addTo(map);
+  // Buat dua layer terpisah
+  baseLayers = L.layerGroup().addTo(map);
+  animLayers = L.layerGroup().addTo(map);
 
-  const selStart = document.getElementById("sel-start"); //
-  const selGoal  = document.getElementById("sel-goal"); //
+  const selStart = document.getElementById("sel-start"); 
+  const selGoal  = document.getElementById("sel-goal"); 
 
-  for (const name in NODES) { //
-    const o1 = new Option(name, name); //
-    const o2 = new Option(name, name); //
-    if (name === "Medan")     o1.selected = true; //
-    if (name === "Palembang") o2.selected = true; //
-    selStart.add(o1); //
-    selGoal.add(o2); //
+  for (const name in NODES) { 
+    const o1 = new Option(name, name); 
+    const o2 = new Option(name, name); 
+    if (name === "Medan")     o1.selected = true; 
+    if (name === "Pekanbaru") o2.selected = true; 
+    selStart.add(o1); 
+    selGoal.add(o2); 
   }
 
-  document.querySelectorAll(".tab-btn").forEach((btn) => //
-    btn.addEventListener("click", () => setTab(btn.dataset.tab)) //
+  document.querySelectorAll(".tab-btn").forEach((btn) => 
+    btn.addEventListener("click", () => setTab(btn.dataset.tab)) 
   );
-  document.getElementById("run-btn").addEventListener("click", runAll); //
+  document.getElementById("run-btn").addEventListener("click", runAll); 
 
-  updateInfo(); //
-  draw(); //
+  // PANGGIL GAMBAR STATIS 1 KALI SAJA DI SINI!
+  drawBaseMap(); 
+
+  updateInfo(); 
+  draw(); 
 }
 
-document.addEventListener("DOMContentLoaded", init); //
+document.addEventListener("DOMContentLoaded", init);

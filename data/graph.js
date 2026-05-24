@@ -50,14 +50,14 @@ const NODES = {
   Dumai:              { lat: 1.66663, lon: 101.40018 }, // Cabang Buntu Pantai Timur
   Duri:               { lat: 1.25961, lon: 101.21309 },
   Kandis:             { lat: 1.00118, lon: 101.11644 },
-  Minas:              { lat: 0.74261, lon: 0.74261 },
+  Minas:              { lat: 0.74261, lon: 101.45234 },
 
   // === CABANG 7: AREA RIAU TENGAH & PEKANBARU SEKITARNYA ===
   PasirPengarayan:    { lat: 0.86198, lon: 100.2955 },
   Bangkinang:         { lat: 0.34135, lon: 101.02795 },
-  Perawang:           { lat: 0.67343, lon: 0.67343 },
+  Perawang:           { lat: 0.67343, lon: 101.59322 },
   Pekanbaru:          { lat: 0.50706, lon: 101.44777 },
-  Siak:               { lat: 0.81188, lon: 0.81188 }, // Cabang Buntu
+  Siak:               { lat: 0.81188, lon: 101.79796 }, // Cabang Buntu
 };
 
 // [kotaA, kotaB, jarak_km] — graf tidak berarah
