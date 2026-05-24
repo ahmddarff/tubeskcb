@@ -63,77 +63,77 @@ const NODES = {
 // [kotaA, kotaB, jarak_km] — graf tidak berarah
 const EDGES = [
   // --- AWALAN DARI MEDAN ---
-  ["Medan", "PancurBatu", 0], // Membuka jalur Pegunungan
-  ["Medan", "LubukPakam", 0], // Membuka jalur Lintas Timur
+  ["Medan", "PancurBatu", 17.4], // Membuka jalur Pegunungan
+  ["Medan", "LubukPakam", 36.8], // Membuka jalur Lintas Timur
 
   // --- CABANG 2: JALUR PEGUNUNGAN KARO ---
-  ["PancurBatu", "Berastagi", 0],
-  ["Berastagi", "Kabanjahe", 0],
-  ["Kabanjahe", "Merek", 0],
-  ["Merek", "Saribudolok", 0],
+  ["PancurBatu", "Berastagi", 47.6],
+  ["Berastagi", "Kabanjahe", 9.8],
+  ["Kabanjahe", "Merek", 28.6],
+  ["Merek", "Saribudolok", 16.2],
   // Tembusan dari gunung ke lintas tengah:
-  ["Saribudolok", "Pematangsiantar", 0],
-  ["Saribudolok", "Prapat", 0],
+  ["Saribudolok", "Pematangsiantar", 62.5],
+  ["Saribudolok", "Prapat", 66.1],
 
   // --- CABANG 3: PERCABANGAN PAKAM - TEBING TINGGI ---
   // Sub-jalur 3A: Pesisir / Tol
-  ["LubukPakam", "Perbaungan", 0],
-  ["Perbaungan", "SeiRampah", 0],
-  ["SeiRampah", "Tebing", 0],
+  ["LubukPakam", "Perbaungan", 11],
+  ["Perbaungan", "SeiRampah", 27],
+  ["SeiRampah", "Tebing", 21.2],
   // Sub-jalur 3B: Dalam / Perkebunan
-  ["LubukPakam", "Galang", 0],
-  ["Galang", "DolokMasihul", 0],
-  ["DolokMasihul", "Tebing", 0],
+  ["LubukPakam", "Galang", 16.9],
+  ["Galang", "DolokMasihul", 22.3],
+  ["DolokMasihul", "Tebing", 19.8],
   
   // --- CABANG 4: JALUR PESISIR ASAHAN & LABUHANBATU ---
-  ["Tebing", "Indrapura", 0],
-  ["Indrapura", "LimaPuluh", 0],
-  ["LimaPuluh", "Kisaran", 0],
-  ["Kisaran", "TanjungBalai", 0], // Buntu
+  ["Tebing", "Indrapura", 41.8],
+  ["Indrapura", "LimaPuluh", 18.3],
+  ["LimaPuluh", "Kisaran", 45.5],
+  ["Kisaran", "TanjungBalai", 22.7], // Buntu
   
   // Detail Kisaran -> Aek Kanopan via Simpang Ampat
-  ["Kisaran", "SimpangAmpat", 0],
-  ["SimpangAmpat", "UlakMedan", 0],
-  ["UlakMedan", "AekKanopan", 0],
+  ["Kisaran", "SimpangAmpat", 15.5],
+  ["SimpangAmpat", "UlakMedan", 29.6],
+  ["UlakMedan", "AekKanopan", 22.3],
   
-  ["AekKanopan", "Rantauprapat", 0],
-  ["Rantauprapat", "Kotapinang", 0],
-  ["Kotapinang", "BaganBatu", 0],
+  ["AekKanopan", "Rantauprapat", 71.9],
+  ["Rantauprapat", "Kotapinang", 54.3],
+  ["Kotapinang", "BaganBatu", 52.1],
 
   // --- CABANG 5: JALUR LINTAS TENGAH (Via Danau Toba & Tapsel) ---
-  ["Tebing", "Pematangsiantar", 46],
-  ["Pematangsiantar", "Prapat", 0],
-  ["Prapat", "Porsea", 0],
+  ["Tebing", "Pematangsiantar", 45.8],
+  ["Pematangsiantar", "Prapat", 48.8],
+  ["Prapat", "Porsea", 41.1],
   
   // SHORTCUT MAUT (Porsea tembus langsung ke Ulak Medan)
-  ["Porsea", "UlakMedan", 0], 
+  ["Porsea", "UlakMedan", 88.7], 
   
-  ["Porsea", "Balige", 0],
-  ["Balige", "Tarutung", 0], 
-  ["Tarutung", "Sibolga", 0], // Buntu
-  ["Tarutung", "Padangsidimpuan", 0],
-  ["Sibolga", "Padangsidimpuan", 88],
+  ["Porsea", "Balige", 24.9],
+  ["Balige", "Tarutung", 52.3], 
+  ["Tarutung", "Sibolga", 64.5], // Buntu
+  ["Tarutung", "Padangsidimpuan", 104],
+  ["Sibolga", "Padangsidimpuan", 88.2],
   
   // Lintas Tengah ke Riau (Padangsidimpuan -> Riau Selatan)
-  ["Padangsidimpuan", "GunungTua", 0],
-  ["GunungTua", "PasirPengarayan", 0],
-  ["PasirPengarayan", "Bangkinang", 0],
+  ["Padangsidimpuan", "GunungTua", 62.8],
+  ["GunungTua", "PasirPengarayan", 170],
+  ["PasirPengarayan", "Bangkinang", 121],
 
   // --- CABANG 6: AREA RIAU UTARA (Lintas Timur Lanjutan) ---
-  ["BaganBatu", "UjungTanjung", 0],
-  ["UjungTanjung", "Dumai", 0], // Memecah ke Dumai
-  ["UjungTanjung", "Duri", 0],  // Memecah ke Duri
-  ["Dumai", "Duri", 78],        // Tol penghubung
-  ["Duri", "Kandis", 0],
-  ["Kandis", "Minas", 0],
+  ["BaganBatu", "UjungTanjung", 104],
+  ["UjungTanjung", "Dumai", 48], // Memecah ke Dumai
+  ["UjungTanjung", "Duri", 55.8],  // Memecah ke Duri
+  ["Dumai", "Duri", 74.4],        // Tol penghubung
+  ["Duri", "Kandis", 58.7],
+  ["Kandis", "Minas", 65.4],
 
   // --- CABANG 7: PERTEMUAN AKHIR DI PEKANBARU ---
-  ["Minas", "Pekanbaru", 0],      // Jalur Lintas Utama (Lurus)
-  ["Minas", "Perawang", 0],       // Belok ke jalur industri
-  ["Perawang", "Pekanbaru", 0],   // Tembus Pekanbaru via PT SIR / Maredan
-  ["Perawang", "Siak", 0],        // Akses menuju Siak (Buntu)
+  ["Minas", "Pekanbaru", 29.9],      // Jalur Lintas Utama (Lurus)
+  ["Minas", "Perawang", 24.8],       // Belok ke jalur industri
+  ["Perawang", "Pekanbaru", 39.5],   // Tembus Pekanbaru via PT SIR / Maredan
+  ["Perawang", "Siak", 52],        // Akses menuju Siak (Buntu)
 
-  ["Bangkinang", "Pekanbaru", 0], // Pertemuan dari Lintas Tengah
+  ["Bangkinang", "Pekanbaru", 65.9], // Pertemuan dari Lintas Tengah
 ];
 
 function buildAdjacency() {
