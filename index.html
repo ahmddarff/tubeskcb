@@ -71,7 +71,7 @@
             <div class="legend-item"><div class="legend-dot" style="background:#D85A30"></div>Hill Climbing</div>
           </div>
 
-          <div class="table-wrap">
+          <div class="table-wrap" style="margin-top: 0;">
             <table class="data-table">
               <thead>
                 <tr>
@@ -82,12 +82,17 @@
                 </tr>
               </thead>
               <tbody>
-                <template x-for="edge in edges" :key="edge[0]+'-'+edge[1]">
+                <template x-for="edge in visibleEdges" :key="edge[0]+'-'+edge[1]">
                   <tr>
                     <td x-text="edge[0]"></td>
                     <td x-text="edge[1]"></td>
                     <td x-text="edge[2] + ' km'"></td>
                     <td x-text="formatTimeStr(edge[3])"></td>
+                  </tr>
+                </template>
+                <template x-if="visibleEdges.length === 0 && hasRun && activeTab !== 'compare'">
+                  <tr>
+                    <td colspan="4" style="text-align:center; color:var(--muted); font-style:italic;">Rute tidak ditemukan / buntu.</td>
                   </tr>
                 </template>
               </tbody>
@@ -193,6 +198,29 @@
               : `Mode <b>Semua Algoritma</b>: Menampilkan semua jalur sekaligus. Solid tebal = A*, putus panjang = DFS, putus pendek = Hill Climbing.`
           };
           return texts[this.activeTab] || texts.compare;
+        },
+
+        get visibleEdges() {
+          // Jika belum di-run atau sedang di tab Semua Algoritma, tampilkan semua jalan
+          if (!this.hasRun || this.activeTab === 'compare') {
+            return this.edges;
+          }
+          
+          // Jika sedang di tab spesifik (A*, DFS, HC), ambil rutenya saja
+          const res = this.results[this.activeTab];
+          if (res && res.found) {
+            const pathEdges = [];
+            for (let i = 0; i < res.path.length - 1; i++) {
+              const a = res.path[i];
+              const b = res.path[i+1];
+              // Cari data jalan aslinya di EDGES
+              const edge = this.edges.find(e => (e[0]===a && e[1]===b) || (e[0]===b && e[1]===a));
+              if (edge) pathEdges.push(edge);
+            }
+            return pathEdges;
+          }
+          
+          return []; // Kosongkan jika rute gagal / tidak ditemukan
         },
 
         formatPathStr(path) { return formatPath(path); },
