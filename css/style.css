@@ -140,11 +140,19 @@ select:focus {
   transform: scale(0.97);
 }
 
+.action-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 1.25rem;
+}
+
 .tabs {
   display: inline-flex;
   gap: 4px;
   flex-wrap: wrap;
-  margin-bottom: 1.25rem;
   background: #f1f5f9;
   padding: 5px;
   border-radius: 99px;
@@ -253,6 +261,47 @@ select:focus {
   height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
+}
+
+.table-wrap {
+  margin-top: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.data-table th {
+  background: #f1f5f9;
+  color: var(--muted);
+  padding: 8px 12px;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  border-bottom: 1px solid var(--border);
+}
+
+.data-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tr:hover td {
+  background: #f8fafc;
 }
 
 .section-title {

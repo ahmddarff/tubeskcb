@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="bg-slate-50">
+<body>
   <div class="container" x-data="pathfinderApp()" x-init="initMap()">
     
     <header>
@@ -49,14 +49,16 @@
               </select>
             </div>
           </div>
-          
-          <div class="tabs">
-            <button class="tab-btn" :class="activeTab === 'compare' ? 'active' : ''" @click="setTab('compare')">Semua Algoritma</button>
-            <button class="tab-btn" :class="activeTab === 'dfs' ? 'active' : ''" @click="setTab('dfs')">DFS</button>
-            <button class="tab-btn" :class="activeTab === 'astar' ? 'active' : ''" @click="setTab('astar')">A*</button>
-            <button class="tab-btn" :class="activeTab === 'hc' ? 'active' : ''" @click="setTab('hc')">Hill Climbing</button>
+
+          <div class="action-row">
+            <div class="tabs">
+              <button class="tab-btn" :class="activeTab === 'compare' ? 'active' : ''" @click="setTab('compare')">Semua Algoritma</button>
+              <button class="tab-btn" :class="activeTab === 'dfs' ? 'active' : ''" @click="setTab('dfs')">DFS</button>
+              <button class="tab-btn" :class="activeTab === 'astar' ? 'active' : ''" @click="setTab('astar')">A*</button>
+              <button class="tab-btn" :class="activeTab === 'hc' ? 'active' : ''" @click="setTab('hc')">Hill Climbing</button>
+            </div>
+            <button class="run-btn" @click="runAll()">Jalankan Algoritma</button>
           </div>
-          <button class="run-btn" @click="runAll()">Jalankan Algoritma</button>
 
           <div class="canvas-wrap">
             <div x-ref="mapDiv" id="map" style="width: 100%; height: 380px; border-radius: 8px;"></div>
@@ -68,6 +70,30 @@
             <div class="legend-item"><div class="legend-dot" style="background:#EF9F27"></div>A*</div>
             <div class="legend-item"><div class="legend-dot" style="background:#D85A30"></div>Hill Climbing</div>
           </div>
+
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Kota A</th>
+                  <th>Kota B</th>
+                  <th>Jarak</th>
+                  <th>Waktu Tempuh</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="edge in edges" :key="edge[0]+'-'+edge[1]">
+                  <tr>
+                    <td x-text="edge[0]"></td>
+                    <td x-text="edge[1]"></td>
+                    <td x-text="edge[2] + ' km'"></td>
+                    <td x-text="formatTimeStr(edge[3])"></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+
         </div>
       </div>
 
@@ -78,9 +104,9 @@
           <template x-if="hasRun">
             <div style="display: contents;">
               <template x-for="k in visibleAlgos" :key="k">
-                <div class="res-card" :class="{'best': results[k].found && results[k].weight === bestWeight, 'failed': !results[k].found}">
+                <div class="res-card" :class="{ 'best': results[k].found && results[k].weight === bestWeight, 'failed': !results[k].found }">
                   
-                  <div class="res-algo-label" :style="`color:${algoMeta[k].color}`">
+                  <div class="res-algo-label" :style="\`color:\${algoMeta[k].color}\`">
                     <span x-text="algoMeta[k].label"></span>
                     <template x-if="results[k].found && results[k].weight === bestWeight">
                       <span class="badge-best">Paling Optimal</span>
@@ -100,7 +126,7 @@
                     <template x-if="!results[k].found"><span>—</span></template>
                   </div>
                   
-                  <div class="res-meta" x-text="`${results[k].explored} node · ${results[k].timeMs} ms`"></div>
+                  <div class="res-meta" x-text="\`\${results[k].explored} node · \${results[k].timeMs} ms\`"></div>
                   
                   <div class="res-path" x-text="results[k].found ? formatPathStr(results[k].path) : (results[k].stuckAt ? 'Terjebak di: ' + results[k].stuckAt : 'Tidak ditemukan')"></div>
                 </div>
@@ -132,7 +158,6 @@
 
     document.addEventListener('alpine:init', () => {
       Alpine.data('pathfinderApp', () => ({
-        // State UI
         startCity: 'Medan',
         goalCity: 'Pekanbaru',
         mode: 'dist',
@@ -141,15 +166,14 @@
         results: {},
         nodesCount: Object.keys(NODES).length,
         edgesCount: EDGES.length,
+        edges: EDGES,
 
-        // State Map
         map: null,
         baseLayers: null,
         animLayers: null,
         animProgress: 1,
         animReq: null,
 
-        // Properti Komputasi (Getter)
         get bestWeight() {
           if (!this.hasRun) return Infinity;
           const keys = ["dfs", "astar", "hc"];
@@ -171,11 +195,9 @@
           return texts[this.activeTab] || texts.compare;
         },
 
-        // Helper untuk template HTML
         formatPathStr(path) { return formatPath(path); },
         formatTimeStr(mins) { return formatTime(mins); },
 
-        // Inisialisasi Peta Leaflet
         initMap() {
           this.map = L.map(this.$refs.mapDiv).setView([1.8, 100.0], 7);
           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -189,7 +211,6 @@
           this.drawAnimMap();
         },
 
-        // Gambar Statis Peta Dasar (1x saja)
         drawBaseMap() {
           if (!this.baseLayers) return;
           this.baseLayers.clearLayers();
@@ -215,7 +236,7 @@
             const coords = [NODES[name].lat, NODES[name].lon];
             const marker = L.circleMarker(coords, {
               radius: 5, fillColor: "#ffffff", color: "rgba(100,100,100,0.35)", weight: 1.5, fillOpacity: 1
-            }).addTo(this.baseLayers); // <--- Sudah diperbaiki (tambah this.)
+            }).addTo(this.baseLayers);
 
             marker.bindTooltip(name, {
               permanent: true, direction: "top", className: 'city-label', offset: [0, -10]
@@ -223,7 +244,6 @@
           }
         },
 
-        // Event saat ubah pilihan (Tab & Dropdown)
         clearResults() {
           this.hasRun = false;
           this.results = {};
@@ -231,11 +251,10 @@
         },
 
         setTab(tab) {
-          this.activeTab = tab; // Tidak ada lagi alert! Bebas klik!
-          if (this.hasRun) this.startAnimation(); // Cuma jalan kalau udah pernah klik Run
+          this.activeTab = tab;
+          if (this.hasRun) this.startAnimation();
         },
 
-        // Algoritma Induk
         runAll() {
           if (this.startCity === this.goalCity) {
             alert("Pilih kota asal dan tujuan yang berbeda ya!");
@@ -251,7 +270,6 @@
 
           for (let i = 0; i < keys.length; i++) {
             let t = performance.now();
-            // A* dan HC butuh NODES dan Heuristic, DFS tidak
             let res = (keys[i] === "dfs") 
               ? fns[i](this.startCity, this.goalCity, currentAdj) 
               : fns[i](this.startCity, this.goalCity, currentAdj, NODES, currentHeuristic);
@@ -270,7 +288,6 @@
           this.startAnimation();
         },
 
-        // Mesin Animasi Leaflet
         startAnimation() {
           this.animProgress = 0;
           if (this.animReq) cancelAnimationFrame(this.animReq);
@@ -290,7 +307,7 @@
           if (!this.map || !this.animLayers) return;
           this.animLayers.clearLayers();
 
-          const toHighlight = this.activeTab === "compare" ? ["dfs", "astar", "hc"] : (ALGO_META[this.activeTab] ? [this.activeTab] : []);
+          const toHighlight = this.visibleAlgos;
           const reachedNodes = new Set();
 
           for (const key of toHighlight) { 
@@ -347,7 +364,6 @@
             }).addTo(this.animLayers);
           }
         }
-
       }));
     });
   </script>
