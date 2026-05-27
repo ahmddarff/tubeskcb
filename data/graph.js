@@ -136,12 +136,10 @@ const EDGES = [
   ["Bangkinang", "Pekanbaru", 65.9, 94], // Pertemuan dari Lintas Tengah
 ];
 
-// Fungsi ini sekarang bisa menerima mode ("dist" atau "time")
 function buildAdjacency(mode = "dist") {
   const adj = {};
   for (const name in NODES) adj[name] = [];
   for (const [a, b, d, t] of EDGES) {
-    // Jika temanmu belum selesai mengisi waktu, kita pakai nilai jarak sebagai cadangan sementara agar tidak error
     const timeVal = t !== undefined ? t : d; 
     
     // Tentukan bobot (weight) mana yang akan dipakai AI
@@ -153,7 +151,6 @@ function buildAdjacency(mode = "dist") {
   return adj;
 }
 
-// Fungsi ini dirombak untuk menghitung Total Jarak DAN Total Waktu sekaligus
 function calculatePathStats(path) {
   let dist = 0;
   let time = 0;
