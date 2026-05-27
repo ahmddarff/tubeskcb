@@ -39,8 +39,10 @@ const NODES = {
   Prapat:             { lat: 2.66251, lon: 98.93416 },
   Porsea:             { lat: 2.46173, lon: 99.13601 },
   Balige:             { lat: 2.33371, lon: 99.08325 },
+  Siborongborong:     { lat: 2.2115, lon: 98.97189 },
   Tarutung:           { lat: 2.01188, lon: 98.97977 },
   Sibolga:            { lat: 1.74061, lon: 98.78234 }, // Cabang Buntu Pantai Barat
+  Sipirok:            { lat: 1.60446, lon: 99.26892 },
   Padangsidimpuan:    { lat: 1.37218, lon: 99.27301 },
   GunungTua:          { lat: 1.03017, lon: 99.80551 },
 
@@ -72,8 +74,8 @@ const EDGES = [
   ["Kabanjahe", "Merek", 28.6, 53],
   ["Merek", "Saribudolok", 16.2, 28],
   // Tembusan dari gunung ke lintas tengah:
-  ["Saribudolok", "Pematangsiantar", 62.5, 109],
   ["Saribudolok", "Prapat", 66.1, 109],
+  ["Saribudolok", "Pematangsiantar", 62.5, 109],
 
   // --- CABANG 3: PERCABANGAN PAKAM - TEBING TINGGI ---
   // Sub-jalur 3A: Pesisir / Tol
@@ -101,17 +103,18 @@ const EDGES = [
   ["Kotapinang", "BaganBatu", 52.1, 88],
 
   // --- CABANG 5: JALUR LINTAS TENGAH (Via Danau Toba & Tapsel) ---
-  ["Tebing", "Pematangsiantar", 45.8, 63],
-  ["Pematangsiantar", "Prapat", 48.8, 87],
   ["Prapat", "Porsea", 41.1, 60],
-  
-  // SHORTCUT MAUT (Porsea tembus langsung ke Ulak Medan)
-  ["Porsea", "UlakMedan", 88.7, 168], 
+  ["Pematangsiantar", "Prapat", 48.8, 87],
+  ["Tebing", "Pematangsiantar", 45.8, 63],
   
   ["Porsea", "Balige", 24.9, 44],
-  ["Balige", "Tarutung", 52.3, 87], 
+  ["Porsea", "UlakMedan", 88.7, 168], 
+  
+  ["Balige", "Siborongborong", 25, 41],
+  ["Siborongborong", "Tarutung", 27, 42], 
   ["Tarutung", "Sibolga", 64.5, 135], // Buntu
-  ["Tarutung", "Padangsidimpuan", 104, 195],
+  ["Tarutung", "Sipirok", 69, 115],
+  ["Sipirok", "Padangsidimpuan", 36, 70],
   ["Sibolga", "Padangsidimpuan", 88.2, 172],
   
   // Lintas Tengah ke Riau (Padangsidimpuan -> Riau Selatan)

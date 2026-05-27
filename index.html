@@ -191,24 +191,34 @@
 
         // Gambar Statis Peta Dasar (1x saja)
         drawBaseMap() {
+          if (!this.baseLayers) return;
           this.baseLayers.clearLayers();
-          for (const [a, b, w] of EDGES) { 
-            const latlngs = [[NODES[a].lat, NODES[a].lon], [NODES[b].lat, NODES[b].lon]];
-            L.polyline(latlngs, { color: "rgba(140,140,140,0.4)", weight: 1.5 }).addTo(this.baseLayers);
 
-            const midLat = (NODES[a].lat + NODES[b].lat) / 2;
-            const midLon = (NODES[a].lon + NODES[b].lon) / 2;
-            L.tooltip({ permanent: true, direction: 'center', className: 'edge-label', interactive: false })
-              .setLatLng([midLat, midLon]).setContent(`${w} km`).addTo(this.baseLayers);
+          for (const [a, b, d, t] of EDGES) { 
+            const latlngs = [[NODES[a].lat, NODES[a].lon], [NODES[b].lat, NODES[b].lon]];
+            
+            const polyline = L.polyline(latlngs, { 
+              color: "rgba(140,140,140,0.35)",
+              weight: 2,
+              className: 'base-edge'
+            }).addTo(this.baseLayers);
+
+            polyline.bindTooltip(`<b>${d} km</b>`, {
+              permanent: false, 
+              direction: 'auto',
+              sticky: true,
+              className: 'edge-label-hover'
+            });
           }
 
           for (const name in NODES) { 
             const coords = [NODES[name].lat, NODES[name].lon];
             const marker = L.circleMarker(coords, {
               radius: 5, fillColor: "#ffffff", color: "rgba(100,100,100,0.35)", weight: 1.5, fillOpacity: 1
-            }).addTo(this.baseLayers);
+            }).addTo(this.baseLayers); // <--- Sudah diperbaiki (tambah this.)
+
             marker.bindTooltip(name, {
-              permanent: true, direction: "top", className: 'city-label', offset: [0, -8]
+              permanent: true, direction: "top", className: 'city-label', offset: [0, -10]
             });
           }
         },
