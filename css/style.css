@@ -419,6 +419,54 @@ select:focus {
   background: #fdf6e8;
 }
 
+.canvas-wrap {
+  position: relative;
+}
+
+.canvas-wrap.fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 99999 !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+.canvas-wrap.fullscreen #map {
+  height: 100vh !important;
+  border-radius: 0 !important;
+}
+
+.expand-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  color: #0f172a;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.expand-btn:hover {
+  background: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
 @media (max-width: 850px) {
   body {
     padding: 1rem 0.75rem;
