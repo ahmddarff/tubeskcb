@@ -389,26 +389,35 @@
             const isKey = name === this.startCity || name === this.goalCity;
             if (isKey) continue;
             
-            const marker = L.circleMarker([NODES[name].lat, NODES[name].lon], {
+            // 1. Gambar titik lingkaran saja
+            L.circleMarker([NODES[name].lat, NODES[name].lon], {
               radius: 6.5, fillColor: dynamicColor, color: "#1e40af", weight: 1, fillOpacity: 1
             }).addTo(this.animLayers);
             
-            // SMART LABEL: Munculkan nama kota secara permanen HANYA JIKA dilewati rute
-            marker.bindTooltip(name, {
-              permanent: true, direction: "top", className: 'city-label', offset: [0, -10]
-            });
+            // 2. Paku Tooltip langsung ke koordinat bumi (Bukan ke circle marker)
+            if (this.animProgress >= 1) {
+              L.tooltip({ permanent: true, direction: "top", className: 'city-label', offset: [0, -10] })
+                .setLatLng([NODES[name].lat, NODES[name].lon])
+                .setContent(name)
+                .addTo(this.animLayers);
+            }
           }
 
           for (const name of [this.startCity, this.goalCity]) {
             if (!NODES[name]) continue;
-            const marker = L.circleMarker([NODES[name].lat, NODES[name].lon], {
+            
+            // 1. Gambar titik lingkaran Start/Goal
+            L.circleMarker([NODES[name].lat, NODES[name].lon], {
               radius: 8, fillColor: "#1D9E75", color: "#0F6E56", weight: 2, fillOpacity: 1
             }).addTo(this.animLayers);
             
-            // Start/Goal selalu muncul
-            marker.bindTooltip(name, {
-              permanent: true, direction: "top", className: 'city-label bold-label', offset: [0, -10]
-            });
+            // 2. Paku Tooltip Start/Goal langsung ke koordinat bumi
+            if (this.animProgress >= 1) {
+              L.tooltip({ permanent: true, direction: "top", className: 'city-label bold-label', offset: [0, -10] })
+                .setLatLng([NODES[name].lat, NODES[name].lon])
+                .setContent(name)
+                .addTo(this.animLayers);
+            }
           }
         }
       }));
